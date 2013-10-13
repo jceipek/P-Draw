@@ -53,6 +53,7 @@ define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'ke
     }
   , generateSnapPoints: function () {
       var _g = this;
+      if (_g.state.tempSnapPoints.length) { return; }
       for (var childKey in G.two.scene.children) {
         if (G.two.scene.children.hasOwnProperty(childKey)) {
           var child = G.two.scene.children[childKey];
@@ -71,6 +72,7 @@ define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'ke
           }
         }
       };
+      _g.refresh();
     }
   , getMessageForCurrTool: function () {
       var _g = this
@@ -152,12 +154,12 @@ define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'ke
       var _g = this
         elem = document.getElementById('js-drawing-interface');
 
-      _g.two = new Two({ fullscreen: true }).appendTo(elem);
+      _g.two = new Two({ fullscreen: true, type: Two.Types.webgl }).appendTo(elem);
       _g.state.map = new gbind.ObjectArray(_g.two);
       _g.connectHandlers();
       _g.state.actionDisplay = new tbind.HTMLNode('.js-state-display');
       _g.activeTool = 'createCircle';
-      _g.two.update();
+      _g.refresh();
     }
   , addObj: function (obj) {
       var _g = this;
@@ -181,15 +183,21 @@ define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'ke
       $(window).bind('mousedown', function (e) {
         if (e.button === 0) {
           _g.generateSnapPoints();
+          var mPos = { x: e.clientX, y: e.clientY }
+            , snap = _g.closestSnapPointTo({x: mPos.x, y: mPos.y});
+          if (snap) {
+            mPos.x = snap.x;
+            mPos.y = snap.y;
+          }
           switch (_g.activeTool) {
             case 'createCircle':
-              op.ref = { type: 'circle', x: e.clientX, y: e.clientY, isTemp: true };
+              op.ref = { type: 'circle', x: mPos.x, y: mPos.y, isTemp: true };
               op.ref = _g.addObj(op.ref);
               op.message = _g.getMessageForCurrTool();
               _g.refresh();
               break;
             case 'createLine':
-              op.ref = { type: 'line', x1: e.clientX, y1: e.clientY, x2: e.clientX, y2: e.clientY, isTemp: true };
+              op.ref = { type: 'line', x1: mPos.x, y1: mPos.y, x2: mPos.x, y2: mPos.y, isTemp: true };
               op.ref = _g.addObj(op.ref);
               op.message = _g.getMessageForCurrTool();
               _g.refresh();
@@ -258,8 +266,10 @@ define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'ke
         if (e.keyCode === KEYCODE.z && e.metaKey) {
           if (e.shiftKey) {
             _g.redoLast();
+            _g.refresh();
           } else {
             _g.undoLast();
+            _g.refresh();
           }
         }
 
@@ -277,22 +287,23 @@ define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'ke
             break;
         }
         if (switchTool) {
+          _g.generateSnapPoints();
           _g.state.actionDisplay.contents = _g.getMessageForCurrTool();
         }
       });
 
-      // $(window).bind('keyup', function (e) {
-      //   switch (e.keyCode) {
-      //     case KEYCODE.c:
-      //       // _g.activeTool = null;
-      //       break;
-      //     case KEYCODE.l:
-      //       // _g.activeTool = null;
-      //       break;
-      //     default:
-      //       break;
-      //   }
-      // });
+      $(window).bind('keyup', function (e) {
+        switch (e.keyCode) {
+          case KEYCODE.c:
+            // _g.activeTool = null;
+            break;
+          case KEYCODE.l:
+            // _g.activeTool = null;
+            break;
+          default:
+            break;
+        }
+      });
     }
   };
 
