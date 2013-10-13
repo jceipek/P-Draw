@@ -1,4 +1,4 @@
-define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'keycodes'], function ($, two, handlers, gbind, tbind, utils, KEYCODE) {
+define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'keycodes', 'tools', 'operationmanager'], function ($, two, handlers, gbind, tbind, utils, KEYCODE, tools, operationmanager) {
   var DEBUG = true
     , G;
 
@@ -6,24 +6,21 @@ define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'ke
     two: null
   , get activeTool() {
       var _g = this;
-      return _g.state.op.tool;
+      console.log("Currently broken!");
+      //return _g.state.op.tool;
+      return null;
     }
   , set activeTool(val) {
       var _g = this;
-      $('.js-tool__panel').children('[data-tool=' + _g.state.op.tool +']').removeClass('is-active');
-      $('.js-tool__panel').children('[data-tool=' + val +']').addClass('is-active');
-      _g.state.actionDisplay.contents = _g.getMessageForCurrTool();
-      _g.state.op.tool = val;
+      //$('.js-tool__panel').children('[data-tool=' + _g.state.op.tool +']').removeClass('is-active');
+      //$('.js-tool__panel').children('[data-tool=' + val +']').addClass('is-active');
+      //_g.state.actionDisplay.contents = _g.getMessageForCurrTool();
+      //_g.state.op.tool = val;
+      console.log("Currently broken!");
     }
   , state: {
       actionDisplay: null
     , map: null
-    , op: { tool: 'createCircle'
-          , ref: null
-          , message: ""
-          }
-    , ops: [] // Sequence of applied operations. Push to add new step.
-    , redoOps: [] // Sequence of operations that were undone. Pop and perform to redo.
     , tempSnapPoints: [] // Used for temporary references to snap locations
     }
   , closestSnapPointTo: function (pos) {
@@ -108,23 +105,6 @@ define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'ke
       }
 
     }
-  , redoLast: function () {
-      var _g = this
-        , op = _g.state.redoOps.pop();
-      if (op) {
-        _g.state.actionDisplay.contents = "Redo " + utils.uncapitalized(op.message);
-        _g.performOp(op);
-      }
-    }
-  , undoLast: function () {
-      var _g = this
-        , op = _g.state.ops.pop();
-      if (op) {
-        _g.state.actionDisplay.contents = "Undo " + utils.uncapitalized(op.message);
-        _g.state.redoOps.push(op);
-        _g.undoOp(op);
-      };
-    }
   , performOp: function (proxyOp) {
       var _g = this
         , ops = _g.state.ops;
@@ -159,19 +139,8 @@ define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'ke
       _g.connectHandlers();
       _g.state.actionDisplay = new tbind.HTMLNode('.js-state-display');
       _g.activeTool = 'createCircle';
-      _g.refresh();
-    }
-  , addObj: function (obj) {
-      var _g = this;
-      return _g.state.map.push(obj);
-    }
-  , removeObj: function (obj) {
-      var _g = this;
-      return _g.state.map.remove(obj);
-    }
-  , refresh: function () {
-      var _g = this;
-      _g.state.map.update();
+      // _g.refresh();
+      tools.registerAll(_g.state);
     }
   , connectHandlers: function () {
       var _g = this
@@ -180,96 +149,17 @@ define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'ke
         return false;
       });
 
-      $(window).bind('mousedown', function (e) {
-        if (e.button === 0) {
-          _g.generateSnapPoints();
-          var mPos = { x: e.clientX, y: e.clientY }
-            , snap = _g.closestSnapPointTo({x: mPos.x, y: mPos.y});
-          if (snap) {
-            mPos.x = snap.x;
-            mPos.y = snap.y;
-          }
-          switch (_g.activeTool) {
-            case 'createCircle':
-              op.ref = { type: 'circle', x: mPos.x, y: mPos.y, isTemp: true };
-              op.ref = _g.addObj(op.ref);
-              op.message = _g.getMessageForCurrTool();
-              _g.refresh();
-              break;
-            case 'createLine':
-              op.ref = { type: 'line', x1: mPos.x, y1: mPos.y, x2: mPos.x, y2: mPos.y, isTemp: true };
-              op.ref = _g.addObj(op.ref);
-              op.message = _g.getMessageForCurrTool();
-              _g.refresh();
-              break;
-          default:
-            throw "Unrecognized tool: '" + _g.activeTool + "'!";
-          }
-        }
-      });
-
-      $(window).bind('mousemove', function (e) {
-        if (op.ref) {
-          var mPos = { x: e.clientX, y: e.clientY }
-            , snap = _g.closestSnapPointTo({x: mPos.x, y: mPos.y});
-          if (snap) {
-            mPos.x = snap.x;
-            mPos.y = snap.y;
-          }
-          switch (op.tool) {
-            case 'createCircle':
-              var center = { x: op.ref.x, y: op.ref.y };
-              radius = Math.sqrt(utils.distSquared(center, mPos));
-              op.ref.radius = radius;
-              op.message = _g.getMessageForCurrTool();
-              _g.state.actionDisplay.contents = op.message;
-              _g.refresh();
-              break;
-            case 'createLine':
-              op.ref.x2 = mPos.x;
-              op.ref.y2 = mPos.y;
-              op.message = _g.getMessageForCurrTool();
-              _g.state.actionDisplay.contents = op.message;
-              _g.refresh();
-              break;
-            default:
-              throw "Unrecognized tool: '" + type + "'!";
-          }
-        }
-      });
-
-      $(window).bind('mouseup', function (e) {
-        if (op.ref) {
-          switch (op.tool) {
-            case 'createLine':
-              // Same as circle
-            case 'createCircle':
-              _g.clearSnapPoints();
-              var proxyOp = { action: 'create'
-                            , obj: op.ref.toJSON()
-                            , message: op.message };
-              _g.removeObj(op.ref);
-              _g.performOp(proxyOp);
-              op.ref = null;
-              _g.refresh();
-              // Currently breaks the undo tree.
-              // A more interesting approach might be visual undo, with an actual tree?
-              _g.state.redoOps.length = 0; // Clear the array
-              break;
-            default:
-              throw "Unrecognized tool: '" + type + "'!";
-          }
-        }
-      });
+      $(window).bind('mousedown', tools.onmousedown);
+      $(window).bind('mouseup', tools.onmouseup);
+      $(window).bind('mousemove', tools.onmousemove);
+      $(window).bind('keydown', tools.onkeydown);
 
       $(window).bind('keydown', function (e) {
         if (e.keyCode === KEYCODE.z && e.metaKey) {
           if (e.shiftKey) {
-            _g.redoLast();
-            _g.refresh();
+            operationmanager.redoLast();
           } else {
-            _g.undoLast();
-            _g.refresh();
+            operationmanager.undoLast();
           }
         }
 
