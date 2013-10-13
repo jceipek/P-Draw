@@ -1,0 +1,46 @@
+body {
+   -webkit-user-select: none;
+   -moz-user-select: -moz-none;
+   -webkit-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+   /*font-family: 'Raleway', sans-serif;*/
+   font-family: 'Quattrocento Sans', sans-serif;
+   color: #999999;
+}
+
+.state-display {
+  width: 25em;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0.5em;
+  font-size: 1em;
+}
+
+.tool__panel {
+  display: inline-block;
+  margin-left: 1em;
+  /*padding-bottom: 0.5em;*/
+  /*border-bottom: 1px solid #cccccc;*/
+}
+
+.tool__panel__item {
+  padding-left: 0.5em;
+}
+
+.tool__panel__item .key {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.tool__panel h2 {
+  font-size: 1.3em;
+  margin-bottom: 0em;
+  font-weight: normal;
+}
+
+.is-active {
+  color: #111111;
+  /*font-weight: bold;*/
+  padding-left: 1em;
+}
