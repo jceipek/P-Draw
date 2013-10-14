@@ -4,12 +4,11 @@ body {
    -webkit-user-select: none;
    -ms-user-select: none;
    user-select: none;
-   /*font-family: 'Raleway', sans-serif;*/
    font-family: 'Quattrocento Sans', sans-serif;
    color: #999999;
 }
 
-.state-display {
+.status-display {
   width: 25em;
   margin-left: auto;
   margin-right: auto;
@@ -20,8 +19,6 @@ body {
 .tool__panel {
   display: inline-block;
   margin-left: 1em;
-  /*padding-bottom: 0.5em;*/
-  /*border-bottom: 1px solid #cccccc;*/
 }
 
 .tool__panel__item {
@@ -43,4 +40,11 @@ body {
   color: #111111;
   /*font-weight: bold;*/
   padding-left: 1em;
+}
+
+.param {
+  padding-left: 0.3em;
+  padding-right: 0.3em;
+  border-radius: 10px;
+  background-color: #79efff;
 }
