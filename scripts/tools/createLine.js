@@ -4,7 +4,9 @@ define(['keycodes'
        , 'snapmanager'
        , 'utils'], function (KEYCODE, operationmanager, stateutils, snapmanager, utils) {
   var _line = null
-    , rnd = function (n) { return utils.roundToDecimals(n, 2); };
+    , rnd = function (n) { return utils.roundToDecimals(n, 2); }
+    , _start = null
+    , _end = null;
   var T = {
     name: 'createLine'
   , key: KEYCODE.l
@@ -24,6 +26,9 @@ define(['keycodes'
       if (closest) {
         mPos.x = closest.x;
         mPos.y = closest.y;
+        _start = closest.ident;
+      } else {
+        _start = "&lt;" + rnd(mPos.x) + ", " + rnd(mPos.y) + "&gt;";
       }
       lineData = { type: 'line', x1: mPos.x, y1: mPos.y, x2: mPos.x, y2: mPos.y, isTemp: true };
       _line = stateutils.addObj(lineData);
@@ -36,6 +41,9 @@ define(['keycodes'
         if (closest) {
           mPos.x = closest.x;
           mPos.y = closest.y;
+          _end = closest.ident;
+        } else {
+          _end = "&lt;" + rnd(mPos.x) + ", " + rnd(mPos.y) + "&gt;";
         }
         _line.x2 = mPos.x;
         _line.y2 = mPos.y;
@@ -59,8 +67,7 @@ define(['keycodes'
   , getMessage: function () {
       var message;
       if (_line) {
-        message = "Draw line from <span class='param'>&lt;" + rnd(_line.x1) + ", " + rnd(_line.y1)
-                + "&gt;</span> to <span class='param'>&lt;" + rnd(_line.x2) + ", " + rnd(_line.y2) + "&gt;</span>.";
+        message = "Draw line from <span class='param'>" + _start + "</span> to <span class='param'>" + _end + "</span>.";
       } else {
         message = "Click and drag to draw a line.";
       }
