@@ -1,4 +1,8 @@
-define(['keycodes', 'operationmanager', 'stateutils', 'utils'], function (KEYCODE, operationmanager, stateutils, utils) {
+define(['keycodes'
+       , 'operationmanager'
+       , 'stateutils'
+       , 'snapmanager'
+       , 'utils'], function (KEYCODE, operationmanager, stateutils, snapmanager, utils) {
   var _circle = null
     , rnd = function (n) { return utils.roundToDecimals(n, 2); };
   var T = {
@@ -6,9 +10,21 @@ define(['keycodes', 'operationmanager', 'stateutils', 'utils'], function (KEYCOD
   , key: KEYCODE.c
   , metaKey: false
   , shiftKey: false
+  , activate: function () {
+      snapmanager.generatePoints();
+    }
+  , deactivate: function () {
+      snapmanager.clearPoints();
+    }
   , onmousedown: function (e) {
       var mPos = { x: e.clientX, y: e.clientY }
-        , circleData = { type: 'circle', x: mPos.x, y: mPos.y, isTemp: true };
+        , closest = snapmanager.closestPointTo(mPos)
+        , circleData;
+      if (closest) {
+        mPos.x = closest.x;
+        mPos.y = closest.y;
+      }
+      circleData = { type: 'circle', x: mPos.x, y: mPos.y, isTemp: true };
       _circle = stateutils.addObj(circleData);
       stateutils.refresh();
     }
@@ -16,19 +32,25 @@ define(['keycodes', 'operationmanager', 'stateutils', 'utils'], function (KEYCOD
       if(_circle) {
         var mPos = { x: e.clientX, y: e.clientY }
           , center = { x: _circle.x, y: _circle.y }
+          , closest = snapmanager.closestPointTo(mPos);
+          if (closest) {
+            mPos.x = closest.x;
+            mPos.y = closest.y;
+          }
           _circle.radius = Math.sqrt(utils.distSquared(center, mPos));
           stateutils.refresh();
       }
     }
   , onmouseup: function (e) {
       if (_circle) {
-                //_g.clearSnapPoints();
+        snapmanager.clearPoints();
         var proxyOp = { action: 'create'
                       , obj: _circle.toJSON()
                       , message: this.getMessage() };
         stateutils.removeObj(_circle);
         operationmanager.performOp(proxyOp);
         _circle = null;
+        snapmanager.generatePoints();
         stateutils.refresh();
         operationmanager.wipeRedoHistory();
       }

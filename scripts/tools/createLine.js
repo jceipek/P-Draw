@@ -1,4 +1,8 @@
-define(['keycodes', 'operationmanager', 'stateutils', 'utils'], function (KEYCODE, operationmanager, stateutils, utils) {
+define(['keycodes'
+       , 'operationmanager'
+       , 'stateutils'
+       , 'snapmanager'
+       , 'utils'], function (KEYCODE, operationmanager, stateutils, snapmanager, utils) {
   var _line = null
     , rnd = function (n) { return utils.roundToDecimals(n, 2); };
   var T = {
@@ -6,15 +10,33 @@ define(['keycodes', 'operationmanager', 'stateutils', 'utils'], function (KEYCOD
   , key: KEYCODE.l
   , metaKey: false
   , shiftKey: false
+  , activate: function () {
+      snapmanager.generatePoints();
+    }
+  , deactivate: function () {
+      snapmanager.clearPoints();
+    }
   , onmousedown: function (e) {
+      snapmanager.generatePoints();
       var mPos = { x: e.clientX, y: e.clientY }
-        , circleData = { type: 'line', x1: mPos.x, y1: mPos.y, x2: mPos.x, y2: mPos.y, isTemp: true };
-      _line = stateutils.addObj(circleData);
+        , closest = snapmanager.closestPointTo(mPos)
+        , lineData;
+      if (closest) {
+        mPos.x = closest.x;
+        mPos.y = closest.y;
+      }
+      lineData = { type: 'line', x1: mPos.x, y1: mPos.y, x2: mPos.x, y2: mPos.y, isTemp: true };
+      _line = stateutils.addObj(lineData);
       stateutils.refresh();
     }
   , onmousemove: function (e) {
       if(_line) {
-        var mPos = { x: e.clientX, y: e.clientY };
+        var mPos = { x: e.clientX, y: e.clientY }
+          , closest = snapmanager.closestPointTo(mPos);
+        if (closest) {
+          mPos.x = closest.x;
+          mPos.y = closest.y;
+        }
         _line.x2 = mPos.x;
         _line.y2 = mPos.y;
         stateutils.refresh();
@@ -22,13 +44,14 @@ define(['keycodes', 'operationmanager', 'stateutils', 'utils'], function (KEYCOD
     }
   , onmouseup: function (e) {
       if (_line) {
-        //_g.clearSnapPoints();
+        snapmanager.clearPoints();
         var proxyOp = { action: 'create'
                       , obj: _line.toJSON()
                       , message: this.getMessage() };
         stateutils.removeObj(_line);
         operationmanager.performOp(proxyOp);
         _line = null;
+        snapmanager.generatePoints();
         stateutils.refresh();
         operationmanager.wipeRedoHistory();
       }

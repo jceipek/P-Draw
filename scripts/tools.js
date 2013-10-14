@@ -23,7 +23,9 @@ define([ 'operationmanager'
       _setStatusDisplay = setter;
     }
   , changeActiveTool: function (tool) {
+      if (_activeTool && _activeTool.deactivate) _activeTool.deactivate();
       _activeTool = tool;
+      if (tool && tool.activate) tool.activate();
     }
   , updateStatusDisplay: function (tool) {
       if (tool && tool.getMessage) {

@@ -6,7 +6,7 @@ define(['two', 'graphicsbind'], function (two, gbind) {
   var G = {
     init: function (targetElement) {
       _state = {};
-      _two = new Two({ fullscreen: true, type: Two.Types.webgl }).appendTo(targetElement);
+      _two = new Two({ fullscreen: true, type: Two.Types.canvas }).appendTo(targetElement);
       _map = new gbind.ObjectArray(_two);
     }
   , addObj: function (obj) {
@@ -17,6 +17,9 @@ define(['two', 'graphicsbind'], function (two, gbind) {
     }
   , refresh: function () {
       _map.update();
+    }
+  , performFnOnScene: function (fn) {
+      fn(_two.scene);
     }
   };
 
