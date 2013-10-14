@@ -25,45 +25,48 @@ define([ 'operationmanager'
   , changeActiveTool: function (tool) {
       _activeTool = tool;
     }
-  , updateStatusDisplay: function () {
-      if (_activeTool && _activeTool.getMessage) {
-        _setStatusDisplay(_activeTool.getMessage());
+  , updateStatusDisplay: function (tool) {
+      if (tool && tool.getMessage) {
+        var message = tool.getMessage();
+        if (message) _setStatusDisplay(message);
       }
     }
   , onmousedown: function (e) {
       if (_activeTool && _activeTool.onmousedown) {
         _activeTool.onmousedown(e);
-        this.updateStatusDisplay();
+        this.updateStatusDisplay(_activeTool);
       }
     }
   , onmousemove: function (e) {
       if (_activeTool && _activeTool.onmousemove) {
         _activeTool.onmousemove(e);
-        this.updateStatusDisplay();
+        this.updateStatusDisplay(_activeTool);
       }
     }
   , onmouseup: function (e) {
       if (_activeTool && _activeTool.onmouseup) {
         _activeTool.onmouseup(e);
-        this.updateStatusDisplay();
+        this.updateStatusDisplay(_activeTool);
       }
     }
   , onkeydown: function (e) {
       // TODO: Check this logic
-      var key = e.keyCode + "," + e.metaKey + "," + e.shiftKey;
-      if (_keyToTools[key] && _keyToTools[key].type === 'instantaneous') {
-        if (_keyToTools[key].onkeydown) {
-          _keyToTools[key].onkeydown(e);
+      var key = e.keyCode + "," + e.metaKey + "," + e.shiftKey
+        , tool = _keyToTools[key];
+      if (tool && tool.type === 'instantaneous') {
+        if (tool.onkeydown) {
+          tool.onkeydown(e);
+          this.updateStatusDisplay(tool);
         }
       } else {
-        this.changeActiveTool(_keyToTools[key]);
-        this.updateStatusDisplay();
+        this.changeActiveTool(tool);
+        this.updateStatusDisplay(tool);
       }
     }
   , onkeyup: function (e) {
       if (_activeTool && _activeTool.onkeyup) {
         _activeTool.onkeyup(e);
-        this.updateStatusDisplay();
+        this.updateStatusDisplay(_activeTool);
       }
     }
   };

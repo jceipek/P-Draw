@@ -41,3 +41,10 @@ body {
   /*font-weight: bold;*/
   padding-left: 1em;
 }
+
+.param {
+  padding-left: 0.3em;
+  padding-right: 0.3em;
+  border-radius: 10px;
+  background-color: #79efff;
+}

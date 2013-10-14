@@ -36,8 +36,8 @@ define(['keycodes', 'operationmanager', 'stateutils', 'utils'], function (KEYCOD
   , getMessage: function () {
       var message;
       if (_circle) {
-        message = "Draw circle at <" + rnd(_circle.x) + ", " + rnd(_circle.y)
-                + "> with radius <" + rnd(_circle.radius) + ">.";
+        message = "Draw circle at <span class='param'>&lt;" + rnd(_circle.x) + ", " + rnd(_circle.y)
+                + "&gt;</span> with radius <span class='param'>&lt;" + rnd(_circle.radius) + "&gt;</span>.";
       } else {
         message = "Click and drag to draw a circle.";
       }

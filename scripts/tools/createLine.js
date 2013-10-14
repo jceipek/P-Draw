@@ -36,8 +36,8 @@ define(['keycodes', 'operationmanager', 'stateutils', 'utils'], function (KEYCOD
   , getMessage: function () {
       var message;
       if (_line) {
-        message = "Draw line from <" + rnd(_line.x1) + ", " + rnd(_line.y1)
-                + "> to <" + rnd(_line.x2) + ", " + rnd(_line.y2) + ">.";
+        message = "Draw line from <span class='param'>&lt;" + rnd(_line.x1) + ", " + rnd(_line.y1)
+                + "&gt;</span> to <span class='param'>&lt;" + rnd(_line.x2) + ", " + rnd(_line.y2) + "&gt;</span>.";
       } else {
         message = "Click and drag to draw a line.";
       }

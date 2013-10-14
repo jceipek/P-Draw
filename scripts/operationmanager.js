@@ -32,7 +32,9 @@ define(['stateutils', 'utils'], function (stateutils, utils) {
         // _m.state.actionDisplay.contents = "Redo " + utils.uncapitalized(op.message);
         _m.performOp(op);
         stateutils.refresh();
+        return op.message;
       }
+      return false;
     }
   , undoLast: function () {
       var _m = this
@@ -42,7 +44,9 @@ define(['stateutils', 'utils'], function (stateutils, utils) {
         _redoOps.push(op);
         _m.undoOp(op);
         stateutils.refresh();
-      };
+        return op.message
+      }
+      return false;
     }
   , wipeRedoHistory: function () {
       // Currently breaks the undo tree.
