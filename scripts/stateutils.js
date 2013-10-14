@@ -18,8 +18,18 @@ define(['two', 'graphicsbind'], function (two, gbind) {
   , refresh: function () {
       _map.update();
     }
-  , performFnOnScene: function (fn) {
-      fn(_two.scene);
+  , performFnOnSnapPoints: function (fn) {
+      var objects = _map.inspect();
+      for (var objIdx = 0; objIdx < objects.length; objIdx++) {
+        var obj = objects[objIdx];
+        if (obj.getSnapPoints) {
+          var snapPoints = obj.getSnapPoints();
+          for (var ptIdx = 0; ptIdx < snapPoints.length; ptIdx++) {
+            fn(snapPoints[ptIdx]);
+          }
+        }
+
+      }
     }
   };
 

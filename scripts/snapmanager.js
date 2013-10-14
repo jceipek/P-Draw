@@ -5,48 +5,27 @@ define(['stateutils', 'utils'], function (stateutils, utils) {
         var i
           , dist
           , closest = {
-              index: 0
-            , dist: Infinity
+              dist: Infinity
             , value: null
           };
-        for (i = 0; i < _points.length; i++) {
-          dist = utils.distSquared(_points[i], pos);
+        stateutils.performFnOnSnapPoints(function (pt) {
+          dist = utils.distSquared(pt, pos);
           if (dist <= closest.dist && dist < 1000) {
-            closest.index = i;
-            closest.dist = dist;
-            closest.value = _points[i];
+             closest.dist = dist;
+             closest.value = pt;
           }
-        }
+        });
         return closest.value;
       }
     , hidePoints: function () {
-        while(_points.length) {
-          stateutils.removeObj(_points.pop());
-        }
+        stateutils.performFnOnSnapPoints(function (pt) {
+          pt._obj.opacity = 0; // XXX: Tight coupling!
+        });
       }
     , showPoints: function () {
-        if (_points.length) { return; }
-        stateutils.performFnOnScene(function (scene) {
-          for (var childKey in scene.children) {
-            if (scene.children.hasOwnProperty(childKey)) {
-              var child = scene.children[childKey];
-              var verts = child.vertices;
-              for (var j = 0; j < verts.length; j++) {
-                var pt = { type: 'circle'
-                         , x: verts[j].x + child.translation.x
-                         , y: verts[j].y + child.translation.y
-                         , isSnapGuide: true };
-                _points.push(stateutils.addObj(pt));
-                pt = { type: 'circle'
-                         , x: child.translation.x
-                         , y: child.translation.y
-                         , isSnapGuide: true };
-                _points.push(stateutils.addObj(pt));
-              }
-            }
-          };
+        stateutils.performFnOnSnapPoints(function (pt) {
+          pt._obj.opacity = 1; // XXX: Tight coupling!
         });
-        stateutils.refresh();
       }
     };
 
