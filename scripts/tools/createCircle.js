@@ -11,10 +11,10 @@ define(['keycodes'
   , metaKey: false
   , shiftKey: false
   , activate: function () {
-      snapmanager.generatePoints();
+      snapmanager.showPoints();
     }
   , deactivate: function () {
-      snapmanager.clearPoints();
+      snapmanager.hidePoints();
     }
   , onmousedown: function (e) {
       var mPos = { x: e.clientX, y: e.clientY }
@@ -43,14 +43,14 @@ define(['keycodes'
     }
   , onmouseup: function (e) {
       if (_circle) {
-        snapmanager.clearPoints();
+        snapmanager.hidePoints();
         var proxyOp = { action: 'create'
                       , obj: _circle.toJSON()
                       , message: this.getMessage() };
         stateutils.removeObj(_circle);
         operationmanager.performOp(proxyOp);
         _circle = null;
-        snapmanager.generatePoints();
+        snapmanager.showPoints();
         stateutils.refresh();
         operationmanager.wipeRedoHistory();
       }

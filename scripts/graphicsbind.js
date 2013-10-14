@@ -52,8 +52,6 @@ define([], function () {
                 if (this._obj) _two.remove(this._obj);
                 this._obj = _two.makeCircle(this._x, this._y, this._radius);
                 if (this._isSnapGuide) {
-                  //this._obj.noStroke();
-                  //this._obj.fill = "#79EFFF";
                   this._obj.stroke = "#79EFFF";
                 }
                 if (this._isTemp) {
@@ -129,9 +127,6 @@ define([], function () {
                set: function(val) {
                 this._x1 = val;
                 this._obj.vertices[0].x = val - this._obj.translation.x;
-                // TODO: Make this more efficient somehow?
-                //this._obj.vertices[0].translation.x = val;
-                // this._remake();
                }
               });
 
@@ -142,9 +137,7 @@ define([], function () {
                },
                set: function(val) {
                 this._y1 = val;
-                // TODO: Make this more efficient somehow?
                 this._obj.vertices[0].y = val - this._obj.translation.y;
-                // this._remake();
                }
               });
 
@@ -156,9 +149,6 @@ define([], function () {
                set: function(val) {
                 this._x2 = val;
                 this._obj.vertices[1].x = val - this._obj.translation.x;
-                //this._obj.vertices[1].x = val;
-                // TODO: Make this more efficient somehow?
-                // this._remake();
                }
               });
 
@@ -170,8 +160,6 @@ define([], function () {
                set: function(val) {
                 this._y2 = val;
                 this._obj.vertices[1].y = val - this._obj.translation.y;
-                // TODO: Make this more efficient somehow?
-                // this._remake();
                }
               });
 

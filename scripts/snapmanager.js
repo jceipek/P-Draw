@@ -19,12 +19,12 @@ define(['stateutils', 'utils'], function (stateutils, utils) {
         }
         return closest.value;
       }
-    , clearPoints: function () {
+    , hidePoints: function () {
         while(_points.length) {
           stateutils.removeObj(_points.pop());
         }
       }
-    , generatePoints: function () {
+    , showPoints: function () {
         if (_points.length) { return; }
         stateutils.performFnOnScene(function (scene) {
           for (var childKey in scene.children) {
