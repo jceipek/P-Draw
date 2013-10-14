@@ -7,8 +7,9 @@ define([ 'operationmanager'
   var _state = {}
     , _keyToTools = {}
     , _activeTool = null
+    , _setStatusDisplay
     , register = function (tool) {
-        _keyToTools[tool.key + "," + tool.metaKey + "," + tool.shiftKey] = tool;
+        _keyToTools[tool.key + "," + (!!tool.metaKey) + "," + (!!tool.shiftKey)] = tool;
       };
 
   var G = {
@@ -18,19 +19,33 @@ define([ 'operationmanager'
       register(undo);
       register(redo);
     }
+  , connectStatusDisplaySetter: function (setter) {
+      _setStatusDisplay = setter;
+    }
+  , changeActiveTool: function (tool) {
+      _activeTool = tool;
+    }
+  , updateStatusDisplay: function () {
+      if (_activeTool && _activeTool.getMessage) {
+        _setStatusDisplay(_activeTool.getMessage());
+      }
+    }
   , onmousedown: function (e) {
       if (_activeTool && _activeTool.onmousedown) {
         _activeTool.onmousedown(e);
+        this.updateStatusDisplay();
       }
     }
   , onmousemove: function (e) {
       if (_activeTool && _activeTool.onmousemove) {
         _activeTool.onmousemove(e);
+        this.updateStatusDisplay();
       }
     }
   , onmouseup: function (e) {
       if (_activeTool && _activeTool.onmouseup) {
         _activeTool.onmouseup(e);
+        this.updateStatusDisplay();
       }
     }
   , onkeydown: function (e) {
@@ -42,15 +57,14 @@ define([ 'operationmanager'
         }
       } else {
         this.changeActiveTool(_keyToTools[key]);
+        this.updateStatusDisplay();
       }
     }
   , onkeyup: function (e) {
       if (_activeTool && _activeTool.onkeyup) {
         _activeTool.onkeyup(e);
+        this.updateStatusDisplay();
       }
-    }
-  , changeActiveTool: function (tool) {
-      _activeTool = tool;
     }
   };
 

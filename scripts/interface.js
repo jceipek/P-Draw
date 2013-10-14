@@ -1,11 +1,15 @@
-define(['zepto', 'handlers', 'htmltextbind', 'utils', 'keycodes', 'tools', 'stateutils'], function ($, handlers, tbind, utils, KEYCODE, tools, stateutils) {
+define(['zepto'
+       , 'handlers'
+       , 'utils'
+       , 'keycodes'
+       , 'tools'
+       , 'stateutils'], function ($, handlers, utils, KEYCODE, tools, stateutils) {
   var DEBUG = true
     , G
-    , interface = {};
+    , _interface = {};
 
   G = {
-    two: null
-  , get activeTool() {
+    get activeTool() {
       var _g = this;
       console.log("Currently broken!");
       //return _g.state.op.tool;
@@ -23,13 +27,16 @@ define(['zepto', 'handlers', 'htmltextbind', 'utils', 'keycodes', 'tools', 'stat
       actionDisplay: null
     }
   , init: function () {
-      var _g = this
-        , elem = document.getElementById('js-drawing-interface');
-      stateutils.init(elem);
+      var _g = this;
+      _interface.canvas = document.getElementById('js-drawing-interface');
+      _interface.statusDisplay = $('.js-status-display');
+      stateutils.init(_interface.canvas);
       _g.connectHandlers();
-      _g.state.actionDisplay = new tbind.HTMLNode('.js-state-display');
-      _g.activeTool = 'createCircle';
       tools.registerAll();
+      tools.connectStatusDisplaySetter(_g.updateStatusDisplay);
+    }
+  , updateStatusDisplay: function (message) {
+      _interface.statusDisplay.html(message);
     }
   , connectHandlers: function () {
       var _g = this
@@ -45,7 +52,6 @@ define(['zepto', 'handlers', 'htmltextbind', 'utils', 'keycodes', 'tools', 'stat
       $(window).bind('keyup', tools.onkeyup.bind(tools));
 
 //     _g.generateSnapPoints();
-//     _g.state.actionDisplay.contents = _g.getMessageForCurrTool();
     }
   };
 

@@ -16,6 +16,6 @@ require.config({
   }
 });
 
-require(['3rdparty/domReady!', 'test2'], function(_, G) {
+require(['3rdparty/domReady!', 'interface'], function(_, G) {
   G.init();
 });

@@ -10,7 +10,6 @@ define(['keycodes', 'operationmanager', 'stateutils', 'utils'], function (KEYCOD
       var mPos = { x: e.clientX, y: e.clientY }
         , circleData = { type: 'circle', x: mPos.x, y: mPos.y, isTemp: true };
       _circle = stateutils.addObj(circleData);
-      //op.message = _g.getMessageForCurrTool();
       stateutils.refresh();
     }
   , onmousemove: function (e) {
@@ -18,8 +17,6 @@ define(['keycodes', 'operationmanager', 'stateutils', 'utils'], function (KEYCOD
         var mPos = { x: e.clientX, y: e.clientY }
           , center = { x: _circle.x, y: _circle.y }
           _circle.radius = Math.sqrt(utils.distSquared(center, mPos));
-          //op.message = _g.getMessageForCurrTool();
-          //_g.state.actionDisplay.contents = op.message;
           stateutils.refresh();
       }
     }
