@@ -1,6 +1,7 @@
-define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'keycodes', 'tools', 'operationmanager'], function ($, two, handlers, gbind, tbind, utils, KEYCODE, tools, operationmanager) {
+define(['zepto', 'handlers', 'htmltextbind', 'utils', 'keycodes', 'tools', 'stateutils'], function ($, handlers, tbind, utils, KEYCODE, tools, stateutils) {
   var DEBUG = true
-    , G;
+    , G
+    , interface = {};
 
   G = {
     two: null
@@ -20,127 +21,15 @@ define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'ke
     }
   , state: {
       actionDisplay: null
-    , map: null
-    , tempSnapPoints: [] // Used for temporary references to snap locations
-    }
-  , closestSnapPointTo: function (pos) {
-      var _g = this
-        , i
-        , dist
-        , closest = {
-            index: 0
-          , dist: Infinity
-          , value: null
-        };
-      for (i = 0; i < _g.state.tempSnapPoints.length; i++) {
-        dist = utils.distSquared(_g.state.tempSnapPoints[i], pos);
-        if (dist <= closest.dist && dist < 1000) {
-          closest.index = i;
-          closest.dist = dist;
-          closest.value = _g.state.tempSnapPoints[i];
-        }
-      }
-      return closest.value;
-    }
-  , clearSnapPoints: function () {
-      var _g = this;
-      while(_g.state.tempSnapPoints.length) {
-        _g.removeObj(_g.state.tempSnapPoints.pop());
-      }
-    }
-  , generateSnapPoints: function () {
-      var _g = this;
-      if (_g.state.tempSnapPoints.length) { return; }
-      for (var childKey in G.two.scene.children) {
-        if (G.two.scene.children.hasOwnProperty(childKey)) {
-          var child = G.two.scene.children[childKey];
-          var verts = child.vertices;
-          for (var j = 0; j < verts.length; j++) {
-            var pt = { type: 'circle'
-                     , x: verts[j].x + child.translation.x
-                     , y: verts[j].y + child.translation.y
-                     , isSnapGuide: true };
-            _g.state.tempSnapPoints.push(_g.addObj(pt));
-            pt = { type: 'circle'
-                     , x: child.translation.x
-                     , y: child.translation.y
-                     , isSnapGuide: true };
-            _g.state.tempSnapPoints.push(_g.addObj(pt));
-          }
-        }
-      };
-      _g.refresh();
-    }
-  , getMessageForCurrTool: function () {
-      var _g = this
-        , op = _g.state.op
-        , rnd = function (n) { return utils.roundToDecimals(n, 2); };
-      //if (!(_g.activeTool)) { return; };
-      switch (_g.activeTool) {
-        case 'createCircle':
-          var obj = op.ref
-            , message;
-          if (obj) {
-            message = "Draw circle at <" + rnd(obj.x) + ", " + rnd(obj.y)
-                    + "> with radius <" + rnd(obj.radius) + ">.";
-          } else {
-            message = "Click and drag to draw a circle.";
-          }
-          return message;
-          break;
-        case 'createLine':
-          var obj = op.ref
-            , message;
-          if (obj) {
-            message = "Draw line from <" + rnd(obj.x1) + ", " + rnd(obj.y1)
-                    + "> to <" + rnd(obj.x2) + ", " + rnd(obj.y2) + ">.";
-          } else {
-            message = "Click and drag to draw a line.";
-          }
-
-          return message;
-          break;
-        default:
-          throw "Update Message: Unrecognized Tool: '" + _g.activeTool + "'!";
-      }
-
-    }
-  , performOp: function (proxyOp) {
-      var _g = this
-        , ops = _g.state.ops;
-      switch (proxyOp.action) {
-        case 'create':
-          var obj = _g.addObj(proxyOp.obj)
-            , op = { action: proxyOp.action, obj: obj, message: proxyOp.message };
-          ops.push(op);
-          return true;
-          break;
-        default:
-          throw "Perform: Unrecognized Operation: '" + proxyOp.action + "'!";
-      }
-    }
-  , undoOp: function (op) {
-      var _g = this;
-      switch (op.action) {
-        case 'create':
-          _g.removeObj(op.obj);
-          return true;
-          break;
-        default:
-          throw "Undo: Unrecognized Operation: '" + proxyOp.action + "'!";
-      }
     }
   , init: function () {
       var _g = this
-        elem = document.getElementById('js-drawing-interface');
-
-      _g.two = new Two({ fullscreen: true, type: Two.Types.webgl }).appendTo(elem);
-      _g.state.map = new gbind.ObjectArray(_g.two);
+        , elem = document.getElementById('js-drawing-interface');
+      stateutils.init(elem);
       _g.connectHandlers();
       _g.state.actionDisplay = new tbind.HTMLNode('.js-state-display');
       _g.activeTool = 'createCircle';
-      // _g.refresh();
-      tools.registerAll(_g.state);
+      tools.registerAll();
     }
   , connectHandlers: function () {
       var _g = this
@@ -149,51 +38,14 @@ define(['zepto', 'two', 'handlers', 'graphicsbind', 'htmltextbind', 'utils', 'ke
         return false;
       });
 
-      $(window).bind('mousedown', tools.onmousedown);
-      $(window).bind('mouseup', tools.onmouseup);
-      $(window).bind('mousemove', tools.onmousemove);
-      $(window).bind('keydown', tools.onkeydown);
+      $(window).bind('mousedown', tools.onmousedown.bind(tools));
+      $(window).bind('mouseup', tools.onmouseup.bind(tools));
+      $(window).bind('mousemove', tools.onmousemove.bind(tools));
+      $(window).bind('keydown', tools.onkeydown.bind(tools));
+      $(window).bind('keyup', tools.onkeyup.bind(tools));
 
-      $(window).bind('keydown', function (e) {
-        if (e.keyCode === KEYCODE.z && e.metaKey) {
-          if (e.shiftKey) {
-            operationmanager.redoLast();
-          } else {
-            operationmanager.undoLast();
-          }
-        }
-
-        var switchTool = false;
-        switch (e.keyCode) {
-          case KEYCODE.c:
-            _g.activeTool = 'createCircle';
-            switchTool = true;
-            break;
-          case KEYCODE.l:
-            _g.activeTool = 'createLine';
-            switchTool = true;
-            break;
-          default:
-            break;
-        }
-        if (switchTool) {
-          _g.generateSnapPoints();
-          _g.state.actionDisplay.contents = _g.getMessageForCurrTool();
-        }
-      });
-
-      $(window).bind('keyup', function (e) {
-        switch (e.keyCode) {
-          case KEYCODE.c:
-            // _g.activeTool = null;
-            break;
-          case KEYCODE.l:
-            // _g.activeTool = null;
-            break;
-          default:
-            break;
-        }
-      });
+//     _g.generateSnapPoints();
+//     _g.state.actionDisplay.contents = _g.getMessageForCurrTool();
     }
   };
 

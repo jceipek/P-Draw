@@ -1,18 +1,22 @@
-define(['tools/createCircle'], function (createCircle) {
-  var _state = null;
+define(['two', 'graphicsbind'], function (two, gbind) {
+  var _state
+    , _map
+    , _two;
 
   var G = {
-    init: function (state) {
+    init: function (targetElement) {
       _state = {};
+      _two = new Two({ fullscreen: true, type: Two.Types.webgl }).appendTo(targetElement);
+      _map = new gbind.ObjectArray(_two);
     }
   , addObj: function (obj) {
-      return _state.map.push(obj);
+      return _map.push(obj);
     }
   , removeObj: function (obj) {
-      return _state.map.remove(obj);
+      return _map.remove(obj);
     }
   , refresh: function () {
-      _state.map.update();
+      _map.update();
     }
   };
 

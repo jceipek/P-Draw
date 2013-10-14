@@ -1,130 +1,58 @@
-define(['tools/createCircle', 'tools/createLine'], function (createCircle, createLine) {
-  var _state = null
-    , _tools = {}
+define([ 'operationmanager'
+       , 'tools/createCircle'
+       , 'tools/createLine'
+       , 'tools/undo'
+       , 'tools/redo'
+       ], function (operationmanager, createCircle, createLine, undo, redo) {
+  var _state = {}
+    , _keyToTools = {}
+    , _activeTool = null
     , register = function (tool) {
-        _tools[tool.name] = tool;
-        tool.init(_state);
+        _keyToTools[tool.key + "," + tool.metaKey + "," + tool.shiftKey] = tool;
       };
 
-  var _sillytest = 0;
-
   var G = {
-    registerAll: function (state) {
-      var _g = this;
-      _state = state;
+    registerAll: function () {
       register(createCircle);
       register(createLine);
+      register(undo);
+      register(redo);
     }
   , onmousedown: function (e) {
-      if (_sillytest % 2 === 0) {
-        _tools['createCircle'].onmousedown(e);
-      } else {
-        _tools['createLine'].onmousedown(e);
+      if (_activeTool && _activeTool.onmousedown) {
+        _activeTool.onmousedown(e);
       }
     }
   , onmousemove: function (e) {
-      if (_sillytest % 2 === 0) {
-        _tools['createCircle'].onmousemove(e);
-      } else {
-        _tools['createLine'].onmousemove(e);
+      if (_activeTool && _activeTool.onmousemove) {
+        _activeTool.onmousemove(e);
       }
     }
   , onmouseup: function (e) {
-      if (_sillytest % 2 === 0) {
-        _tools['createCircle'].onmouseup(e);
-        console.log('Circle');
-      } else {
-        _tools['createLine'].onmouseup(e);
-        console.log('Line');
+      if (_activeTool && _activeTool.onmouseup) {
+        _activeTool.onmouseup(e);
       }
-      _sillytest += 1;
     }
   , onkeydown: function (e) {
-
+      // TODO: Check this logic
+      var key = e.keyCode + "," + e.metaKey + "," + e.shiftKey;
+      if (_keyToTools[key] && _keyToTools[key].type === 'instantaneous') {
+        if (_keyToTools[key].onkeydown) {
+          _keyToTools[key].onkeydown(e);
+        }
+      } else {
+        this.changeActiveTool(_keyToTools[key]);
+      }
+    }
+  , onkeyup: function (e) {
+      if (_activeTool && _activeTool.onkeyup) {
+        _activeTool.onkeyup(e);
+      }
+    }
+  , changeActiveTool: function (tool) {
+      _activeTool = tool;
     }
   };
 
   return G;
 });
-
-      // $(window).bind('mousedown', function (e) {
-      //   if (e.button === 0) {
-      //     _g.generateSnapPoints();
-      //     var mPos = { x: e.clientX, y: e.clientY }
-      //       , snap = _g.closestSnapPointTo({x: mPos.x, y: mPos.y});
-      //     if (snap) {
-      //       mPos.x = snap.x;
-      //       mPos.y = snap.y;
-      //     }
-      //     switch (_g.activeTool) {
-      //       case 'createCircle':
-      //         op.ref = { type: 'circle', x: mPos.x, y: mPos.y, isTemp: true };
-      //         op.ref = _g.addObj(op.ref);
-      //         op.message = _g.getMessageForCurrTool();
-      //         _g.refresh();
-      //         break;
-      //       case 'createLine':
-      //         op.ref = { type: 'line', x1: mPos.x, y1: mPos.y, x2: mPos.x, y2: mPos.y, isTemp: true };
-      //         op.ref = _g.addObj(op.ref);
-      //         op.message = _g.getMessageForCurrTool();
-      //         _g.refresh();
-      //         break;
-      //     default:
-      //       throw "Unrecognized tool: '" + _g.activeTool + "'!";
-      //     }
-      //   }
-      // });
-
-      // $(window).bind('mousemove', function (e) {
-      //   if (op.ref) {
-      //     var mPos = { x: e.clientX, y: e.clientY }
-      //       , snap = _g.closestSnapPointTo({x: mPos.x, y: mPos.y});
-      //     if (snap) {
-      //       mPos.x = snap.x;
-      //       mPos.y = snap.y;
-      //     }
-      //     switch (op.tool) {
-      //       case 'createCircle':
-      //         var center = { x: op.ref.x, y: op.ref.y };
-      //         radius = Math.sqrt(utils.distSquared(center, mPos));
-      //         op.ref.radius = radius;
-      //         op.message = _g.getMessageForCurrTool();
-      //         _g.state.actionDisplay.contents = op.message;
-      //         _g.refresh();
-      //         break;
-      //       case 'createLine':
-      //         op.ref.x2 = mPos.x;
-      //         op.ref.y2 = mPos.y;
-      //         op.message = _g.getMessageForCurrTool();
-      //         _g.state.actionDisplay.contents = op.message;
-      //         _g.refresh();
-      //         break;
-      //       default:
-      //         throw "Unrecognized tool: '" + type + "'!";
-      //     }
-      //   }
-      // });
-
-      // $(window).bind('mouseup', function (e) {
-      //   if (op.ref) {
-      //     switch (op.tool) {
-      //       case 'createLine':
-      //         // Same as circle
-      //       case 'createCircle':
-      //         _g.clearSnapPoints();
-      //         var proxyOp = { action: 'create'
-      //                       , obj: op.ref.toJSON()
-      //                       , message: op.message };
-      //         _g.removeObj(op.ref);
-      //         _g.performOp(proxyOp);
-      //         op.ref = null;
-      //         _g.refresh();
-      //         // Currently breaks the undo tree.
-      //         // A more interesting approach might be visual undo, with an actual tree?
-      //         _g.state.redoOps.length = 0; // Clear the array
-      //         break;
-      //       default:
-      //         throw "Unrecognized tool: '" + type + "'!";
-      //     }
-      //   }
-      // });
