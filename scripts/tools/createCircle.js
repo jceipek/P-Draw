@@ -51,14 +51,13 @@ define(['keycodes'
     }
   , onmouseup: function (e) {
       if (_circle) {
-        snapmanager.hidePoints();
         var proxyOp = { action: 'create'
                       , obj: _circle.toJSON()
                       , message: this.getMessage() };
         stateutils.removeObj(_circle);
         operationmanager.performOp(proxyOp);
         _circle = null;
-        snapmanager.showPoints();
+        snapmanager.hidePoints();
         stateutils.refresh();
         operationmanager.wipeRedoHistory();
       }

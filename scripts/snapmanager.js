@@ -21,11 +21,13 @@ define(['stateutils', 'utils'], function (stateutils, utils) {
         stateutils.performFnOnSnapPoints(function (pt) {
           pt._obj.opacity = 0; // XXX: Tight coupling!
         });
+        stateutils.refresh();
       }
     , showPoints: function () {
         stateutils.performFnOnSnapPoints(function (pt) {
           pt._obj.opacity = 1; // XXX: Tight coupling!
         });
+        stateutils.refresh();
       }
     };
 

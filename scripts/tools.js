@@ -55,17 +55,20 @@ define([ 'operationmanager'
       // TODO: Check this logic
       var key = e.keyCode + "," + e.metaKey + "," + e.shiftKey
         , tool = _keyToTools[key];
-      if (tool && tool.type === 'instantaneous') {
-        if (tool.onkeydown) {
+      if (tool) {
+        if (tool.onkeydown && tool.type === 'instantaneous') {
           tool.onkeydown(e);
           this.updateStatusDisplay(tool);
+        } else {
+          this.changeActiveTool(tool);
+          this.updateStatusDisplay(tool);
         }
-      } else {
-        this.changeActiveTool(tool);
-        this.updateStatusDisplay(tool);
       }
     }
   , onkeyup: function (e) {
+      var key = e.keyCode + "," + e.metaKey + "," + e.shiftKey
+      , tool = _keyToTools[key];
+      if (tool && _activeTool && _activeTool.deactivate) _activeTool.deactivate();
       if (_activeTool && _activeTool.onkeyup) {
         _activeTool.onkeyup(e);
         this.updateStatusDisplay(_activeTool);
